@@ -40,6 +40,7 @@ It's just a start, so the list of implemented methods is shorter than not.
 - Survey
   + list_surveys
   + list_questions
+  + add_survey
   + delete_survey
   + export_responses
   + import_survey
