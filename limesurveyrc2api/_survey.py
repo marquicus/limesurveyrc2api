@@ -79,6 +79,46 @@ class _Survey(object):
             assert response_type is list
         return response
 
+    def add_survey(self, desired_survey_id, survey_title,
+                   default_survey_language, appearance_format):
+        """ Add an empty survey with minimum details.
+        
+        Parameters
+        :param desired_survey_id: The desired ID of the Survey to add.
+        :type desired_survey_id: Integer
+        :param survey_title: Title of the new Survey.
+        :type survey_title: String
+        :param default_survey_language: Default language of the Survey.
+        :type default_survey_language: String
+        :param appearance_format: (optional) Question appearance format 
+                                  (A, G or S) for "All on one page", 
+                                  "Group by Group", "Single questions", 
+                                  default to group by group (G).
+        :type appearance_format: String
+        
+        """
+        method = "add_survey"
+        params = OrderedDict([("sSessionKey", self.api.session_key),
+                              ("iSurveyID", desired_survey_id),
+                              ("sSurveyTitle ", survey_title),
+                              ("sSurveyLanguage  ", default_survey_language),
+                              ("sformat  ", appearance_format)])
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = ["No permission", 
+                              "Invalid session key", 
+                              "Faulty parameters",
+                              "Creation Failed result"]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is int
+        return response
+    
     def delete_survey(self, survey_id):
         """ Delete a survey.
         
