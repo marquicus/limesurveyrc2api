@@ -68,6 +68,57 @@ class _Survey(object):
             assert response_type is list
         return response
 
+    def add_question(self, survey_id, group_id, import_data, import_data_type,
+                     mandatory_option, question_title, question_text,
+                     question_help_text):
+        """
+        Import a question from lsq file.
+
+        Parameters
+        :param survey_id: The ID of the Survey that the question will belong to.
+        :type survey_id: Integer
+        :param group_id: The ID of the Group that the question will belong to.
+        :type group_id: Integer
+        :param import_data: String containing the BASE 64 encoded data of a lsq.
+        :type import_data: String
+        :param import_data_type: lsq.
+        :type import_data_type: String
+        :param mandatory_option: Mandatory question option (default to No).
+        :type mandatory_option: String
+        :param question_title: new title for the question.
+        :type question_title: String
+        :param question_text: new question text.
+        :type question_text: String
+        :param question_help_text: new question help text.
+        :type question_help_text: String
+        """
+        method = "add_question"
+        params = OrderedDict(
+            [("sSessionKey", self.api.session_key), ("iSurveyID", survey_id),
+             ("iGroupID", group_id), ("sImportData", import_data),
+             ("sImportDataType", import_data_type), ("sMandatory",
+                                                     mandatory_option),
+             ("sNewQuestionTitle",
+              question_title), ("sNewqQuestion",
+                                question_text), ("sNewQuestionHelp",
+                                                 question_help_text)])
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = [
+                "Error: Invalid survey ID",
+                "Error: IMissmatch in surveyid and groupid", "No permission",
+                "Invalid session key"
+            ]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is int
+        return response
+
     def add_survey(self, desired_survey_id, survey_title,
                    default_survey_language, appearance_format):
         """ Add an empty survey with minimum details.
@@ -347,10 +398,10 @@ class _Survey(object):
         
         """
         method = "add_group"
-        params = OrderedDict([("sSessionKey", self.api.session_key),
-                              ("iSurveyID", survey_id),
-                              ("sGroupTitle", group_title),
-                              ("sGroupDescription", group_description)])
+        params = OrderedDict(
+            [("sSessionKey", self.api.session_key), ("iSurveyID", survey_id),
+             ("sGroupTitle", group_title), ("sGroupDescription",
+                                            group_description)])
         response = self.api.query(method=method, params=params)
         response_type = type(response)
 
