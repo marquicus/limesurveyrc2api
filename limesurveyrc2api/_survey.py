@@ -333,3 +333,37 @@ class _Survey(object):
         else:
             assert response_type is list
         return response
+
+    def add_group(self, survey_id, group_title, group_description=""):
+        """ Add an empty group with minimum details to a chosen survey.
+        
+        Parameters
+        :param survey_id: ID of the survey to add the group.
+        :type survey_id: Integer
+        :param group_title: Name of the group.
+        :type group_title: String
+        :param group_description: Optional description of the group.
+        :type group_description: String
+        
+        """
+        method = "add_group"
+        params = OrderedDict([("sSessionKey", self.api.session_key),
+                              ("iSurveyID", survey_id),
+                              ("sGroupTitle", group_title),
+                              ("sGroupDescription", group_description)])
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = [
+                "Error: Invalid survey ID",
+                "No permission",
+                "Invalid S ession key"  # typo in remotecontrol_handle.php
+            ]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is list
+        return response
