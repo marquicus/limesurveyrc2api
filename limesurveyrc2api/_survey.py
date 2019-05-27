@@ -68,7 +68,7 @@ class _Survey(object):
             assert response_type is list
         return response
 
-    def add_question(self, survey_id, group_id, import_data, import_data_type,
+    def import_question(self, survey_id, group_id, import_data, import_data_type,
                      mandatory_option, question_title, question_text,
                      question_help_text):
         """
@@ -92,7 +92,7 @@ class _Survey(object):
         :param question_help_text: new question help text.
         :type question_help_text: String
         """
-        method = "add_question"
+        method = "import_question"
         params = OrderedDict(
             [("sSessionKey", self.api.session_key), ("iSurveyID", survey_id),
              ("iGroupID", group_id), ("sImportData", import_data),
