@@ -68,9 +68,9 @@ class _Survey(object):
             assert response_type is list
         return response
 
-    def import_question(self, survey_id, group_id, import_data, import_data_type,
-                     mandatory_option, question_title, question_text,
-                     question_help_text):
+    def import_question(self, survey_id, group_id, import_data,
+                        import_data_type, mandatory_option, question_title,
+                        question_text, question_help_text):
         """
         Import a question from lsq file.
 
@@ -242,6 +242,40 @@ class _Survey(object):
                     raise LimeSurveyError(method, status)
         else:
             assert response_type is str
+        return response
+
+    def get_question_properties(self,
+                                question_id,
+                                question_setting='all',
+                                language_code=None):
+        """ Get properties of a question in a survey.
+        
+        Parameters
+        :param question_id: ID of the question to get properties.
+        :type question_id: Integer
+        :param question_setting: (optional) properties to get, default to all.
+        :type question_setting: Array
+        :param language_code: (optional) parameter language for multilingual
+                              questions, default are \Survey->language.
+        :type language_code: String
+        """
+        method = "get_question_properties"
+        params = OrderedDict([("sSessionKey", self.api.session_key),
+                              ("iQuestionID", question_id),
+                              ("aQuestionSettings",
+                               question_setting), ("sLanguage",
+                                                   language_code)])
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = ["No permission", "Invalid session key"]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is list
         return response
 
     def import_survey(self,
