@@ -112,3 +112,38 @@ class TestSurveys(TestBase):
         with self.assertRaises(LimeSurveyError) as ctx:
             self.api.survey.list_questions(self.survey_id_invalid)
         self.assertIn("Error: Invalid survey ID", ctx.exception.message)
+
+    def test_get_survey_properties_success(self):
+        """Listing all survey properties for a valid survey id."""
+        response = self.api.survey.get_survey_properties(self.survey_id)
+        self.assertIn("sid", response)
+        self.assertIn("active", response)
+        self.assertIn("expires", response)
+        self.assertIn("adminemail", response)
+
+    def test_get_survey_properties_query_property_success(self):
+        """Listing certain valid survey properties for a valid survey id."""
+        response = self.api.survey.get_survey_properties(self.survey_id, ["sid", "adminemail"])
+        self.assertIn("sid", response)
+        self.assertNotIn("expires", response)
+
+    def test_get_survey_properties_query_property_failure(self):
+        """Listing certain invalid survey properties for an valid survey should return an error."""
+        with self.assertRaises(LimeSurveyError) as ctx:
+            self.api.survey.get_survey_properties(self.survey_id, ["abc"])
+        self.assertIn("No valid Data", ctx.exception.message)
+
+    def test_set_survey_properties_query_property_success(self):
+        """Sending valid dict (even with not existing survey properties)
+        will show the properties which were updated."""
+        properties = {
+            'adminemail': 'marco.rojas@zentek.com.mx',
+            'printanswers': 'N',
+            'abc': 'efg',
+            'startdate': '2020-01-01 00:00:00',
+            'expires': '2021-01-01 00:00:00',
+            'showprogress': 'N'
+        }
+        response = self.api.survey.set_survey_properties(self.survey_id, properties)
+        self.assertIn("adminemail", response)
+        self.assertNotIn("abc", response)

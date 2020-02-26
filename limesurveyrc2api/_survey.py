@@ -122,7 +122,7 @@ class _Survey(object):
     def add_survey(self, desired_survey_id, survey_title,
                    default_survey_language, appearance_format):
         """ Add an empty survey with minimum details.
-        
+
         Parameters
         :param desired_survey_id: The desired ID of the Survey to add.
         :type desired_survey_id: Integer
@@ -130,12 +130,12 @@ class _Survey(object):
         :type survey_title: String
         :param default_survey_language: Default language of the Survey.
         :type default_survey_language: String
-        :param appearance_format: (optional) Question appearance format 
-                                  (A, G or S) for "All on one page", 
-                                  "Group by Group", "Single questions", 
+        :param appearance_format: (optional) Question appearance format
+                                  (A, G or S) for "All on one page",
+                                  "Group by Group", "Single questions",
                                   default to group by group (G).
         :type appearance_format: String
-        
+
         """
         method = "add_survey"
         params = OrderedDict(
@@ -161,7 +161,7 @@ class _Survey(object):
 
     def delete_survey(self, survey_id):
         """ Delete a survey.
-        
+
         Parameters
         :param survey_id: The ID of the Survey to be deleted.
         :type: Integer
@@ -193,11 +193,11 @@ class _Survey(object):
                          to_response_id=None,
                          fields=None):
         """ Export responses in base64 encoded string.
-        
+
         Parameters
         :param survey_id: Id of the Survey.
         :type survey_id: Integer
-        :param document_type: Any format available by plugins 
+        :param document_type: Any format available by plugins
                              (e.g. pdf, csv, xls, doc, json)
         :type document_type: String
         :param language_code: (optional) The language to be used.
@@ -249,7 +249,7 @@ class _Survey(object):
                                 question_setting='all',
                                 language_code=None):
         """ Get properties of a question in a survey.
-        
+
         Parameters
         :param question_id: ID of the question to get properties.
         :type question_id: Integer
@@ -290,7 +290,7 @@ class _Survey(object):
         :param new_name: (optional) The optional new name of the survey
                     Important! Seems only to work if lss file is given!
         :type new_name: String
-        :param dest_survey_id: (optional) This is the new ID of the survey - 
+        :param dest_survey_id: (optional) This is the new ID of the survey -
                           if already used a random one will be taken instead
         :type dest_survey_id: Integer
         """
@@ -333,7 +333,7 @@ class _Survey(object):
 
     def activate_survey(self, survey_id):
         """ Activate an existing survey.
-        
+
         Parameters
         :param survey_id: Id of the Survey to be activated.
         :type survey_id: Integer
@@ -361,12 +361,12 @@ class _Survey(object):
 
     def activate_tokens(self, survey_id, attribute_fields=[]):
         """
-        
+
         Parameters
         :param survey_id: ID of the Survey where a participants table will
             be created for.
         :type survey_id: Integer
-        :param attribute_fields: An array of integer describing any additional 
+        :param attribute_fields: An array of integer describing any additional
             attribute fiields.
         :type attribute_fields: Array
         """
@@ -393,7 +393,7 @@ class _Survey(object):
 
     def list_groups(self, survey_id):
         """ Return the ids and all attributes of groups belonging to survey.
-        
+
         Parameters
         :param survey_id: ID of the survey containing the groups.
         :rtype survey_id: Integer
@@ -421,7 +421,7 @@ class _Survey(object):
 
     def add_group(self, survey_id, group_title, group_description=""):
         """ Add an empty group with minimum details to a chosen survey.
-        
+
         Parameters
         :param survey_id: ID of the survey to add the group.
         :type survey_id: Integer
@@ -429,7 +429,7 @@ class _Survey(object):
         :type group_title: String
         :param group_description: Optional description of the group.
         :type group_description: String
-        
+
         """
         method = "add_group"
         params = OrderedDict(
@@ -451,4 +451,65 @@ class _Survey(object):
                     raise LimeSurveyError(method, status)
         else:
             assert response_type is int
+        return response
+
+    def get_survey_properties(self,
+                              survey_id,
+                              survey_properties=[]):
+        """ Get properties of a question in a survey.
+
+        Parameters
+        :param survey_id: ID of the survey
+        :type survey_id: Integer
+        :param survey_properties: (optional) properties to get, default to all.
+        :type survey_properties: List
+        """
+        method = "get_survey_properties"
+        params = OrderedDict([("sSessionKey", self.api.session_key),
+                              ("iSurveyID", survey_id),
+                              ("aSurveySettings", survey_properties)])
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = ["No permission",
+                              "Error: Invalid survey ID",
+                              "Invalid session key",
+                              "No valid Data"]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is dict
+        return response
+
+    def set_survey_properties(self,
+                              survey_id,
+                              survey_data={}):
+        """ Set properties of an existing survey
+
+        Parameters
+        :param survey_id: ID of the survey
+        :param survey_data: (optional) properties to set @see `get_survey_properties`
+        :type survey_data: Dict
+        """
+        method = "set_survey_properties"
+        params = OrderedDict([("sSessionKey", self.api.session_key),
+                              ("iSurveyID", survey_id),
+                              ("aSurveyData", survey_data)])
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = ["No permission",
+                              "Error: Invalid survey ID",
+                              "Invalid session key",
+                              "No valid Data"]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is dict
         return response
